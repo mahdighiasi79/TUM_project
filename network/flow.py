@@ -89,7 +89,7 @@ class SigmoidFlow(nn.Module):
         super(SigmoidFlow, self).__init__()
         self.hidden_dim = hidden_dim
         self.no_logit = no_logit
-    
+
         self.act_a = act_a
         self.act_b = act_b
         self.act_w = act_w
@@ -130,16 +130,16 @@ class SigmoidFlow(nn.Module):
         if self.no_logit:
             # Only keep the batch dimension, summing all others in case this method is called with more dimensions
             # Adding the passed logdet here to accumulate
-            logdet = logj.sum(dim=tuple(range(1, logj.dim()))) + logdet
+            logdet = logj + logdet
             return x_pre, logdet
 
         x_pre_clipped = x_pre * (1 - EPSILON) + EPSILON * 0.5  # b, v
         xnew = torch.log(x_pre_clipped) - torch.log(1 - x_pre_clipped)  # b, v
 
-        logdet_ = logj + math.log(1 - EPSILON) - (torch.log(x_pre_clipped) + torch.log(-x_pre_clipped + 1))  # b, v
+        logdet = logj + math.log(1 - EPSILON) - (torch.log(x_pre_clipped) + torch.log(-x_pre_clipped + 1)) + logdet  # b, v
 
         # Only keep the batch dimension, summing all others in case this method is called with more dimensions
-        logdet = logdet_.sum(dim=tuple(range(1, logdet_.dim()))) + logdet
+        # logdet = logdet_.sum(dim=tuple(range(1, logdet_.dim()))) + logdet
 
         return xnew, logdet
 
@@ -213,6 +213,7 @@ class DeepSigmoidFlow(nn.Module):
         # x: batches, variables
         logdet = torch.zeros(
             x.shape[0],
+            x.shape[1]
         ).to(x.device)
         for i, layer in enumerate(self.layers):
             x, logdet = layer(

@@ -38,8 +38,8 @@ if __name__ == "__main__":
         },
     }
 
-    batch_size = 7
-    time_steps = 6
+    batch_size = 6
+    time_steps = 5
     x = torch.randn(batch_size, 1, time_steps)
     y = torch.randn(batch_size, 1, time_steps)
     z = x + y
