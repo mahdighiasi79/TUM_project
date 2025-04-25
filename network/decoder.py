@@ -148,4 +148,4 @@ class CopulaDecoder(nn.Module):
         self.marginal_logdet = marginal_logdet
 
         # Loss = negative log likelihood
-        return marginal_logdet
+        return -marginal_logdet
