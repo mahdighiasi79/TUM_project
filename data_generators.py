@@ -6,8 +6,8 @@ class HandCraftedSystems:
 
     def __init__(self, system):
         self.device = torch.device('cpu')
-        # if torch.cuda.is_available():
-        #     self.device = torch.device('cuda')
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
         self.x1 = torch.randn(3, ).to(self.device)
         self.x2 = torch.randn(3, ).to(self.device)
         self.x3 = torch.randn(3, ).to(self.device)
@@ -74,8 +74,8 @@ class Cut_V:
 
     def __init__(self, m, v, nonlinear_function):
         self.device = torch.device('cpu')
-        # if torch.cuda.is_available():
-        #     self.device = torch.device('cuda')
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
         self.m = m
         self.v = v
         self.A = None
