@@ -150,6 +150,7 @@ class TemporalEncoder(nn.Module):
         attention_dim: int,
         attention_feedforward_dim: int,
         dropout: float = 0.1,
+        masked_time_series: int = None,
     ):
         """
         Parameters:

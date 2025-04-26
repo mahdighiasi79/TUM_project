@@ -1,18 +1,6 @@
 import torch
 import pickle
-
-from torch.utils.data import DataLoader
-
 from network import tactis
-
-
-def pearson_corr(x, y):
-    x_centered = x - x.mean()
-    y_centered = y - y.mean()
-    corr = torch.sum(x_centered * y_centered) / (torch.sqrt(torch.sum(x_centered ** 2)) * torch.sqrt(torch.sum(y_centered ** 2)))
-    return corr
-
-# "standardization"
 
 
 if __name__ == "__main__":
@@ -23,6 +11,7 @@ if __name__ == "__main__":
             "attention_dim": 6,
             "attention_feedforward_dim": 2,
             "dropout": 0.0,
+            "masked_time_series": None,
         },
     }
 
@@ -73,7 +62,7 @@ if __name__ == "__main__":
     num_samples, num_series, time_steps = input_tokens.shape
     input_tokens = input_tokens.to(device)
 
-    # input_tokens[:, 1, :] = 0
+    input_tokens[:, 1, :] = 0
 
     hist_time = torch.arange(time_steps - 1).repeat(num_samples, num_series, 1).to(device)
     hist_value = input_tokens[:, :, :-1]
