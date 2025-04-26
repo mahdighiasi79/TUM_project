@@ -5,9 +5,9 @@ import utils
 
 class UnrestrictedPredictor:
 
-    def __init__(self, model_parameters, input_tokens):
+    def __init__(self, model_parameters):
+
         self.model_parameters = model_parameters
-        self.input_tokens = input_tokens
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
         else:
@@ -15,10 +15,10 @@ class UnrestrictedPredictor:
         self.model = None
         self.batch_size = 20
 
-    def train_network(self):
-        num_samples, num_series, time_steps = self.input_tokens.shape
-        hist_time, hist_value, pred_time, pred_value = utils.resolve_input(self.input_tokens, self.device)
-        num_batches = len(self.input_tokens) // self.batch_size
+    def train_network(self, input_tokens):
+        num_samples, num_series, time_steps = input_tokens.shape
+        hist_time, hist_value, pred_time, pred_value = utils.resolve_input(input_tokens, self.device)
+        num_batches = len(input_tokens) // self.batch_size
 
         torch.manual_seed(42)
         model = tactis.TACTiS(num_series, **self.model_parameters).to(self.device)
