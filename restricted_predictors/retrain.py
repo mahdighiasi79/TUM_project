@@ -15,6 +15,7 @@ class Retrain(up.UnrestrictedPredictor):
         for i in range(num_series):
             indices = [j for j in range(self.input_tokens.size(1)) if j != i]
             restricted_tokens = self.input_tokens[:, indices, :]
+            restricted_test_tokens = self.test_tokens[:, indices, :]
             self.restricted_models.append(self.train_network(restricted_tokens))
-            self.restricted_losses.append(self.predict(self.test_tokens))
+            self.restricted_losses.append(self.predict(restricted_test_tokens))
         return self.restricted_losses
