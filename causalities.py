@@ -5,7 +5,20 @@ from restricted_predictors import retrain as r
 from restricted_predictors import constant_series as cs
 
 
-threshold = 0.43
+threshold = 0.45
+
+
+def calculate_directed_information(restricted_loss, upper_bound_loss):
+    directed_information = []
+    for i in range(len(restricted_loss)):
+        if restricted_loss[i] > 0 and upper_bound_loss[i] > 0:
+            directed_information.append(restricted_loss[i] / upper_bound_loss[i])
+        elif restricted_loss[i] < 0 and upper_bound_loss[i] < 0:
+            directed_information.append(upper_bound_loss[i] / restricted_loss[i])
+        else:
+            directed_information.append(torch.inf)
+    directed_information = torch.tensor(directed_information)
+    return torch.log(directed_information)
 
 
 def generate_causalities(time_series, method, model_parameters):
@@ -14,17 +27,17 @@ def generate_causalities(time_series, method, model_parameters):
     train_series = time_series[:train_split]
     test_series = time_series[train_split:]
 
-    base_predictor = up.UnrestrictedPredictor(model_parameters)
-    base_model = base_predictor.train_network(train_series)
-    upper_bound_loss = base_predictor.predict(test_series)
+    base_predictor = up.UnrestrictedPredictor(model_parameters, train_series, test_series)
+    # base_model = base_predictor.train_network()
+    # upper_bound_loss = base_predictor.predict()
 
     if method == "retrain":
         retrain = r.Retrain(model_parameters, train_series, test_series)
-        restricted_losses = retrain.restricted_networks()
+        upper_bound_loss, restricted_losses = retrain.restricted_networks()
 
     elif method == "constant series":
         constant_series = cs.ConstantSeries(model_parameters, train_series, test_series)
-        restricted_losses = constant_series.restricted_predictor()
+        upper_bound_loss, restricted_losses = constant_series.restricted_predictor()
     else:
         print("not a valid method")
         return None
@@ -35,8 +48,15 @@ def generate_causalities(time_series, method, model_parameters):
         if method == "retrain":
             restricted_loss = torch.cat(
                 (restricted_loss[:i], torch.tensor([torch.inf]).to(base_predictor.device), restricted_loss[i:]))
-        directed_information = torch.log(restricted_loss / upper_bound_loss)
+        directed_information = calculate_directed_information(restricted_loss, upper_bound_loss)
+
+        print("restricted loss:", i, restricted_loss)
+        print("directed information:", i, directed_information)
+        print("////////////////////////////////////////////")
+
         causality = (directed_information > threshold)
         causalities.append(causality)
+
+    print("upper bound loss:", upper_bound_loss)
     return causalities
 

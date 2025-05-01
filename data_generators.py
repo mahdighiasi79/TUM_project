@@ -48,6 +48,11 @@ class HandCraftedSystems:
         return torch.tensor([x1, x2, x3, x4]).to(self.device)
 
     def generate_data(self, n):
+        self.x1 = torch.randn(3, ).to(self.device)
+        self.x2 = torch.randn(3, ).to(self.device)
+        self.x3 = torch.randn(3, ).to(self.device)
+        self.x4 = torch.randn(3, ).to(self.device)
+
         generation_function = None
         if self.system == 1:
             generation_function = self.next1
@@ -81,6 +86,7 @@ class Cut_V:
         self.A = None
         self.x_t = torch.zeros((m,)).to(self.device)
         self.generated_data = torch.tensor([]).to(self.device)
+        self.causal_graph = torch.zeros(m, m)
 
         if nonlinear_function == 'relu':
             self.nonlinear_function = torch.relu
@@ -101,6 +107,14 @@ class Cut_V:
     def generate_A(self):
         self.A = torch.randint(-1, 2, (self.m, self.m, self.m)) * 0.5
         self.A = self.A.to(self.device)
+
+    def true_causal_graph(self):
+        for i in range(self.m):
+            for j in range(self.m):
+                for k in range(self.m):
+                    if self.A[i, j, k] != 0 or self.A[i, k, j] != 0:
+                        self.causal_graph[i, j] = 1
+        return self.causal_graph
 
     def cut_v(self, matrix):
         outer_bound = ((matrix > self.v) + (matrix < -self.v)) * self.v
@@ -123,6 +137,7 @@ class Cut_V:
         self.x_t = self.nonlinear_function(self.x_t)
 
     def generate_data(self, n):
+        self.generated_data = torch.tensor([]).to(self.device)
         self.generate_A()
         for _ in range(n):
             self.next()
