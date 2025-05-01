@@ -3,6 +3,7 @@ import torch
 import unrestricted_predictor as up
 from restricted_predictors import retrain as r
 from restricted_predictors import constant_series as cs
+from restricted_predictors import zero_attention_score as zas
 
 
 threshold = 0.45
@@ -28,8 +29,6 @@ def generate_causalities(time_series, method, model_parameters):
     test_series = time_series[train_split:]
 
     base_predictor = up.UnrestrictedPredictor(model_parameters, train_series, test_series)
-    # base_model = base_predictor.train_network()
-    # upper_bound_loss = base_predictor.predict()
 
     if method == "retrain":
         retrain = r.Retrain(model_parameters, train_series, test_series)
@@ -38,6 +37,9 @@ def generate_causalities(time_series, method, model_parameters):
     elif method == "constant series":
         constant_series = cs.ConstantSeries(model_parameters, train_series, test_series)
         upper_bound_loss, restricted_losses = constant_series.restricted_predictor()
+    elif method == "zero attention score":
+        zero_attention_score = zas.ZeroAttentionScore(model_parameters, train_series, test_series)
+        upper_bound_loss, restricted_losses = zero_attention_score.restricted_predictor()
     else:
         print("not a valid method")
         return None
