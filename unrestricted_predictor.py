@@ -27,7 +27,7 @@ class UnrestrictedPredictor:
         model = tactis.TACTiS(num_series, **self.model_parameters).to(self.device)
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-        epochs = 10
+        epochs = 20
         for epoch in range(epochs):
             for i in range(num_batches):
                 mini_batch_hist_time, mini_batch_hist_value, mini_batch_pred_time, mini_batch_pred_value = utils.give_batch(
