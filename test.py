@@ -1,11 +1,12 @@
 import random
 import time
-
 import torch
 
+from network import tactis
 import data_generators as dg
+import utils
 
 
 if __name__ == '__main__':
-    data_generator = dg.Cut_V(4, 5, "cut_v")
-    print(data_generator.generate_data(10).shape)
+    t = torch.randn(2, 3, 4, 5)
+    print(t.transpose(-2, -1).shape)

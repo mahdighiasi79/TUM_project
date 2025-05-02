@@ -15,6 +15,7 @@ limitations under the License.
 import torch
 import time
 from torch import nn
+from network import TransformerEncoderLayer as TEL
 
 
 class Encoder(nn.Module):
@@ -176,8 +177,8 @@ class TemporalEncoder(nn.Module):
         self.attention_dim = attention_dim
         self.attention_feedforward_dim = attention_feedforward_dim
         self.dropout = dropout
-        self.masked_time_series = masked_time_series
         self.total_attention_time = 0.0
+        self.masked_time_series = masked_time_series
 
         self.layer_timesteps = nn.ModuleList(
             [
@@ -193,9 +194,10 @@ class TemporalEncoder(nn.Module):
 
         self.layer_series = nn.ModuleList(
             [
-                nn.TransformerEncoderLayer(
+                TEL.TransformerEncoderLayer(
                     self.attention_dim * self.attention_heads,
                     self.attention_heads,
+                    self.masked_time_series,
                     self.attention_feedforward_dim,
                     self.dropout,
                 )
@@ -257,9 +259,6 @@ class TemporalEncoder(nn.Module):
             data = data.flatten(start_dim=0, end_dim=1)
             # [series, batch * time steps, embedding]
             data = data.transpose(0, 1)
-            # make the masked series zero attention score
-            if self.masked_time_series is not None:
-                data[self.masked_time_series, :, :] = -torch.inf
             # Perform attention
             data = mod_series(data)
             # [batch * time steps, series, embedding]

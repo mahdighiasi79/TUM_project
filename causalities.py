@@ -6,7 +6,7 @@ from restricted_predictors import constant_series as cs
 from restricted_predictors import zero_attention_score as zas
 
 
-threshold = 0.45
+threshold = 0.5
 
 
 def calculate_directed_information(restricted_loss, upper_bound_loss):

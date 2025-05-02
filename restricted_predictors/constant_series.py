@@ -1,5 +1,6 @@
 import copy
 import random
+import torch
 
 import unrestricted_predictor as up
 
@@ -9,7 +10,7 @@ class ConstantSeries(up.UnrestrictedPredictor):
     def __init__(self, model_parameters, train_series, test_series):
         super().__init__(model_parameters, train_series, test_series)
         self.restricted_losses = []
-        self.constant = random.randint(-100, 100)
+        self.constant = 10000000
 
     def restricted_predictor(self):
         num_samples, num_series, time_steps = self.train_series.shape

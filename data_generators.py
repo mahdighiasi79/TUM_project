@@ -87,6 +87,7 @@ class Cut_V:
         self.x_t = torch.zeros((m,)).to(self.device)
         self.generated_data = torch.tensor([]).to(self.device)
         self.causal_graph = torch.zeros(m, m)
+        self.generate_A()
 
         if nonlinear_function == 'relu':
             self.nonlinear_function = torch.relu
@@ -106,7 +107,12 @@ class Cut_V:
 
     def generate_A(self):
         self.A = torch.randint(-1, 2, (self.m, self.m, self.m)) * 0.5
+        self.A[2, 0, :] = 0
+        self.A[2, :, 0] = 0
+        self.A[3, 0, :] = 0
+        self.A[3, :, 0] = 0
         self.A = self.A.to(self.device)
+        print(self.A)
 
     def true_causal_graph(self):
         for i in range(self.m):
@@ -138,7 +144,6 @@ class Cut_V:
 
     def generate_data(self, n):
         self.generated_data = torch.tensor([]).to(self.device)
-        self.generate_A()
         for _ in range(n):
             self.next()
             self.generated_data = torch.cat([self.generated_data, self.x_t.unsqueeze(0)], dim=0)
