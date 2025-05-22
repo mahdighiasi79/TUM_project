@@ -16,3 +16,14 @@ def give_batch(hist_time, hist_value, pred_time, pred_value, batch_size, index):
     mini_batch_pred_time = pred_time[index * batch_size: (index + 1) * batch_size]
     mini_batch_pred_value = pred_value[index * batch_size: (index + 1) * batch_size]
     return mini_batch_hist_time, mini_batch_hist_value, mini_batch_pred_time, mini_batch_pred_value
+
+
+def models_equal(model1, model2):
+    if type(model1) is not type(model2):
+        return False
+    if len(list(model1.parameters())) != len(list(model2.parameters())):
+        return False
+    for p1, p2 in zip(model1.parameters(), model2.parameters()):
+        if not torch.allclose(p1, p2, atol=1e-6):
+            return False
+    return True

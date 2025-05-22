@@ -10,11 +10,10 @@ class Retrain(up.UnrestrictedPredictor):
         self.restricted_models = []
         self.restricted_losses = []
 
-    def restricted_networks(self):
+    def restricted_networks(self, base_model):
         num_samples, num_series, time_steps = self.train_series.shape
 
-        base_model = self.train_network()
-        upper_bound_loss = self.predict()
+        self.model = base_model
 
         train_series_copy = copy.deepcopy(self.train_series)
         test_series_copy = copy.deepcopy(self.test_series)
@@ -29,4 +28,4 @@ class Retrain(up.UnrestrictedPredictor):
             self.train_series = copy.deepcopy(train_series_copy)
             self.test_series = copy.deepcopy(test_series_copy)
 
-        return upper_bound_loss, self.restricted_losses
+        return self.restricted_losses

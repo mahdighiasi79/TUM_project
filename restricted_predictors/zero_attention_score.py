@@ -15,11 +15,12 @@ class ZeroAttentionScore(up.UnrestrictedPredictor):
         for attention_layer in base_model.flow_encoder.layer_series:
             attention_layer.self_attn.masked_time_series = series_index
 
-    def restricted_predictor(self):
+    def restricted_predictor(self, base_model):
         num_samples, num_series, time_steps = self.train_series.shape
-        base_model = self.train_network()
-        upper_bound_loss = self.predict()
+        self.model = copy.deepcopy(base_model)
         for i in range(num_series):
-            self.mask_series(base_model, i)
+            self.model.flow_encoder.layer_series[0].self_attn.masked_time_series = i
+            # self.mask_series(base_model, i)
             self.restricted_losses.append(self.predict())
-        return upper_bound_loss, self.restricted_losses
+            self.model = copy.deepcopy(base_model)
+        return self.restricted_losses

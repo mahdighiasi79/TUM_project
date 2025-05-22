@@ -55,7 +55,6 @@ class MultiheadAttention(nn.Module):
             )
 
         if self.masked_time_series is not None:
-            print("mask is called with the number:", self.masked_time_series)
             assert self.masked_time_series < tgt_len
             attn_scores[:, :, :, self.masked_time_series] = -torch.inf
 
