@@ -52,7 +52,6 @@ class Causalities:
             constant_series = cs.ConstantSeries(self.model_parameters, self.train_series, self.test_series)
             restricted_losses = constant_series.restricted_predictor(self.base_predictor.model)
         elif method == "zero attention score":
-            base_model_copy = copy.deepcopy(self.base_predictor.model)
             zero_attention_score = zas.ZeroAttentionScore(self.model_parameters, self.train_series, self.test_series)
             restricted_losses = zero_attention_score.restricted_predictor(self.base_predictor.model)
         else:

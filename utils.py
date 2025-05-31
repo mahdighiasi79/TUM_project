@@ -27,3 +27,13 @@ def models_equal(model1, model2):
         if not torch.allclose(p1, p2, atol=1e-6):
             return False
     return True
+
+
+class Experiment:
+
+    def __init__(self, model_parameters, data, learning_rate, batch_size, epochs):
+        self.model_parameters = model_parameters
+        self.data = data
+        self.learning_rate = learning_rate
+        self.batch_size = batch_size
+        self.epochs = epochs

@@ -17,6 +17,7 @@ class ConstantSeries(up.UnrestrictedPredictor):
         self.model = base_model
         test_series_copy = copy.deepcopy(self.test_series)
         for i in range(num_series):
+            self.constant = (torch.mean(self.test_series[:, i, :]) + 1) * 10
             self.test_series[:, i, :] = self.constant
             self.restricted_losses.append(self.predict())
             self.test_series = copy.deepcopy(test_series_copy)

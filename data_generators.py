@@ -1,5 +1,6 @@
 import torch
 import math
+import numpy as np
 
 
 class HandCraftedSystems:
@@ -107,12 +108,12 @@ class Cut_V:
 
     def generate_A(self):
         self.A = torch.randint(-1, 2, (self.m, self.m, self.m)) * 0.5
+        # self.A = torch.ones(self.m, self.m, self.m) * 10
         self.A[2, 0, :] = 0
         self.A[2, :, 0] = 0
         self.A[3, 0, :] = 0
         self.A[3, :, 0] = 0
         self.A = self.A.to(self.device)
-        print(self.A)
 
     def true_causal_graph(self):
         for i in range(self.m):
@@ -148,3 +149,58 @@ class Cut_V:
             self.next()
             self.generated_data = torch.cat([self.generated_data, self.x_t.unsqueeze(0)], dim=0)
         return self.generated_data
+
+
+def generate_nonlinear_time_varying_data(T=4000, seed=42):
+    np.random.seed(seed)
+
+    # Initialize time series
+    X = np.zeros(T)
+    Y = np.zeros(T)
+    Z = np.zeros(T)
+
+    # Simulate system
+    for t in range(1, T):
+        # Time-varying coefficient for Y → X
+        a = np.sin(2 * np.pi * t / 200)  # cyclic pattern every 200 steps
+
+        # Nonlinear, time-varying causal relationship: Y → X
+        X[t] = np.tanh(a * Y[t - 1]) + 0.2 * np.random.randn()
+
+        # Nonlinear static causal relationship: Z → Y
+        Y[t] = np.sin(Z[t - 1]) + 0.2 * np.random.randn()
+
+        # Z is independent (no parents)
+        Z[t] = 0.8 * np.tanh(Z[t - 1]) + 0.1 * np.random.randn()
+
+    x = torch.tensor(X.reshape(1000, 4), dtype=torch.float)
+    y = torch.tensor(Y.reshape(1000, 4), dtype=torch.float)
+    z = torch.tensor(Z.reshape(1000, 4), dtype=torch.float)
+
+    input_tokens = torch.stack([x, y, z], dim=1)
+    return input_tokens
+
+
+def generate_static_nonlinear_data(T=4000, seed=42):
+    np.random.seed(seed)
+
+    X = np.zeros(T)
+    Y = np.zeros(T)
+    Z = np.zeros(T)
+
+    for t in range(1, T):
+        # Exogenous driver
+        Z[t] = 1 / (1 + np.exp(-Z[t - 1])) + 0.3 * np.random.randn()
+
+        # Nonlinear causality: Z → Y
+        Y[t] = np.cos(Z[t - 1]) + 0.3 * np.random.randn()
+
+        # Nonlinear causality: Y → X
+        X[t] = np.tanh(Y[t - 1]) + 0.3 * np.random.randn()
+
+    x = torch.tensor(X.reshape(2000, 2), dtype=torch.float)
+    y = torch.tensor(Y.reshape(2000, 2), dtype=torch.float)
+    z = torch.tensor(Z.reshape(2000, 2), dtype=torch.float)
+
+    input_tokens = torch.stack([x, y, z], dim=1)
+    return input_tokens
